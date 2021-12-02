@@ -1,17 +1,31 @@
 fun main() {
-    fun part1(input: List<String>): Int {
-        return input.size
+    val items = readInput("Day01").map { it.toInt() }
+    val triples = items.windowed(3, 1).map { Triple(it[0], it[1], it[2]) }
+
+    println(countIncreasedItem(items))
+    println(countIncreasedNumberOfTriples(triples))
+}
+
+private fun countIncreasedNumberOfTriples(items: List<Triple<Int, Int, Int>>): Int {
+    var count = 0
+    items.forEachIndexed { index, item ->
+        if (index > 0 && index <= items.size - 1) {
+            val previousSum = items[index - 1].toList().sum()
+            val currentSum = item.toList().sum()
+            if (currentSum > previousSum) count++
+        }
     }
+    return count
+}
 
-    fun part2(input: List<String>): Int {
-        return input.size
+
+private fun countIncreasedItem(items: List<Int>): Int {
+    var count = 0
+    items.forEachIndexed { index, item ->
+        if (index > 0 && index <= items.size - 1) {
+            val previousItem = items[index - 1]
+            if (item > previousItem) count++
+        }
     }
-
-    // test if implementation meets criteria from the description, like:
-    val testInput = readInput("Day01_test")
-    check(part1(testInput) == 1)
-
-    val input = readInput("Day01")
-    println(part1(input))
-    println(part2(input))
+    return count
 }
