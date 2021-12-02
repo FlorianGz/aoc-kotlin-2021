@@ -1,5 +1,9 @@
+package day1
+
+import readInput
+
 fun main() {
-    val items = readInput("Day01").map { it.toInt() }
+    val items = readInput("day1/Day01").map { it.toInt() }
     val triples = items.windowed(3, 1).map { Triple(it[0], it[1], it[2]) }
 
     println(countIncreasedItem(items))
