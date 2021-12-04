@@ -5,18 +5,15 @@ import kotlin.math.pow
 
 fun main() {
     val items = readInput("day3/Day03")
-    //println("power Consumption = ${computePowerConsumption()}")
-    val oxygenGeneratorItem = computeOxygenGenerator(items)
+
+    val powerConsumption = computePowerConsumption(items)
+    println("power Consumption = $powerConsumption")
+
+    val oxygenGeneratorItem = getSubmarineSupportLifeItem(items = items, index = 0, mostFrequentFilter = true)
     val oxygenGeneratorRating = convertBinaryToDecimal(oxygenGeneratorItem.toLong())
 
-    println("last item oxygen = $oxygenGeneratorItem")
-    println("oxygenValue = $oxygenGeneratorRating")
-
-    val co2ScrubberItem = computeC02Scrubber(items)
+    val co2ScrubberItem = getSubmarineSupportLifeItem(items = items, index = 0, mostFrequentFilter = false)
     val co2ScrubberRating = convertBinaryToDecimal(co2ScrubberItem.toLong())
-
-    println("last item co2 = $co2ScrubberItem")
-    println("co2ScrubberRating = $co2ScrubberRating")
 
     val lifeSupportRating = oxygenGeneratorRating * co2ScrubberRating
     println("life support rating = $lifeSupportRating")
@@ -27,7 +24,7 @@ private fun computePowerConsumption(items: List<String>): Int {
     var epsilonRate = ""
 
     for (i in items.first().indices) {
-        gammaRate += getMostCommonBit(items.map { it[i].toString() })
+        gammaRate += getSelectedBit(items.map { it[i].toString() }, true)
     }
 
     gammaRate.forEach {
@@ -39,29 +36,11 @@ private fun computePowerConsumption(items: List<String>): Int {
     return gammaDecimalValue * epsilonDecimalValue
 }
 
-private fun computeOxygenGenerator(items: List<String>, index: Int = 0): String {
-    val mostCommonBit = getMostCommonBit(items.map { it[index].toString() })
-    println("most common bit = $mostCommonBit")
+private fun getSubmarineSupportLifeItem(items: List<String>, index: Int = 0, mostFrequentFilter: Boolean = true): String {
+    val selectedBit = getSelectedBit(items.map { it[index].toString() }, mostFrequentFilter)
+
     var filteredItems = items.mapNotNull {
-        if (it[index].toString() == mostCommonBit) {
-            it
-        } else {
-            null
-        }
-    }
-    println("filtered item $filteredItems")
-
-    if (index < items.first().length - 1 && filteredItems.size > 1) {
-        filteredItems = listOf(computeOxygenGenerator(filteredItems, index + 1))
-    }
-
-    return filteredItems.first()
-}
-
-private fun computeC02Scrubber(items: List<String>, index: Int = 0): String {
-    val leastCommonBit = getLeastCommonBit(items.map { it[index].toString() })
-    var filteredItems = items.mapNotNull {
-        if (it[index].toString() == leastCommonBit) {
+        if (it[index].toString() == selectedBit) {
             it
         } else {
             null
@@ -69,13 +48,13 @@ private fun computeC02Scrubber(items: List<String>, index: Int = 0): String {
     }
 
     if (index < items.first().length - 1 && filteredItems.size > 1) {
-        filteredItems = listOf(computeC02Scrubber(filteredItems, index + 1))
+        filteredItems = listOf(getSubmarineSupportLifeItem(filteredItems, index + 1, mostFrequentFilter))
     }
 
     return filteredItems.first()
 }
 
-private fun getMostCommonBit(items: List<String>): String {
+private fun getSelectedBit(items: List<String>, mostFrequent: Boolean): String {
     var countZero = 0
     var countOne = 0
 
@@ -86,23 +65,11 @@ private fun getMostCommonBit(items: List<String>): String {
             countOne++
         }
     }
-
-    return if (countZero > countOne) "0" else "1"
-}
-
-private fun getLeastCommonBit(items: List<String>): String {
-    var countZero = 0
-    var countOne = 0
-
-    items.forEach {
-        if (it == "0") {
-            countZero++
-        } else {
-            countOne++
-        }
+    return if (mostFrequent) {
+        if (countZero > countOne) "0" else "1"
+    } else {
+        if (countZero <= countOne) "0" else "1"
     }
-
-    return if (countZero <= countOne) "0" else "1"
 }
 
 private fun convertBinaryToDecimal(num: Long): Int {
