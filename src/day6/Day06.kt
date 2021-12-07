@@ -1,32 +1,38 @@
 package day6
 
 import readInput
-import kotlin.math.exp
-import kotlin.math.pow
 
 fun main() {
-    val items =  readInput("day6/Day06_test")
-    val timers = items.first().split(",").map { it.toInt() }
+    val items =  readInput("day6/Day06")
+    val timers = items.first().split(",").map { it.toLong() }
 
-    println("count = ${getNumberOfFish(80, timers)}")
+    println("count = ${getNumberOfFish(256, timers)}")
 }
 
-private fun getNumberOfFish(days: Int, items: List<Int>) : Int {
-    val intervalTimers = mutableListOf<Int>()
-    intervalTimers.addAll(items)
+private fun getNumberOfFish(days: Long, items: List<Long>) : Long {
+    var fishLifecycleMap = items.groupingBy { it }.eachCount().mapValues { it.value.toLong() }.toMutableMap()
+    var fishLifecycleMapCopy = mutableMapOf<Long, Long>()
+    fishLifecycleMapCopy.putAll(fishLifecycleMap)
 
-    (1..days).forEach { day ->
-        val iterator = intervalTimers.listIterator()
-        while (iterator.hasNext()) {
-            val currentItem = iterator.next()
-            if (currentItem != 0) {
-                iterator.set(currentItem - 1)
+    (1..days).forEach { _ ->
+        var fishBorn = 0L
+        fishLifecycleMapCopy.toSortedMap(compareBy { it }).forEach { (key, value) ->
+            if (key != 0L) {
+                fishLifecycleMap[key] = 0
+                fishLifecycleMap[key - 1] = fishLifecycleMap.getOrDefault(key - 1, 0) + value
             } else {
-                iterator.set(6)
-                iterator.add(8)
+                fishLifecycleMap[0] = fishLifecycleMap.getOrDefault(0, 1) - value
+                fishBorn = value
             }
         }
+        if (fishBorn > 0) {
+            fishLifecycleMap[6] =  fishLifecycleMap.getOrDefault(6, 0) + fishBorn
+            fishLifecycleMap[8] =  fishLifecycleMap.getOrDefault(8, 0) + fishBorn
+        }
+
+        fishLifecycleMapCopy.clear()
+        fishLifecycleMapCopy.putAll(fishLifecycleMap)
     }
 
-    return intervalTimers.size
+    return fishLifecycleMap.map { it.value }.sum()
 }
